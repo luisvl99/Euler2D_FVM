@@ -19,10 +19,10 @@ class ColorMap
 {
 public:
 
-    // Map value into [0,1] clamped
+    // Map value into [0,1] clamped (a non-finite value maps to the middle)
     static double normalize(double v, double vmin, double vmax)
     {
-        if(std::abs(vmax - vmin) < 1e-30)
+        if(!std::isfinite(v) || std::abs(vmax - vmin) < 1e-30)
             return 0.5;
         double t = (v - vmin) / (vmax - vmin);
         return std::clamp(t, 0.0, 1.0);

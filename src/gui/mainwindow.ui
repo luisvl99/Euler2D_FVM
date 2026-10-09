@@ -251,14 +251,32 @@
        <widget class="QGroupBox" name="groupBox_3">
         <property name="maximumSize">
          <size>
-          <width>200</width>
-          <height>300</height>
+          <width>240</width>
+          <height>360</height>
          </size>
         </property>
         <property name="title">
          <string>Run and visualization</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_6">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_20">
+           <item>
+            <widget class="QLabel" name="label_17">
+             <property name="text">
+              <string>Case</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="comboCase">
+             <property name="toolTip">
+              <string>Test case: boundary conditions, initial condition and end time</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_12">
            <item>
@@ -377,39 +395,60 @@
           </layout>
          </item>
          <item>
-          <widget class="QPushButton" name="btnStop">
-           <property name="text">
-            <string>Stop</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="comboField"/>
-         </item>
-         <item>
           <widget class="QCheckBox" name="checkSubsonic">
+           <property name="toolTip">
+            <string>Channel flow: characteristic subsonic inlet and outlet</string>
+           </property>
            <property name="text">
             <string>Subsonic BCs</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="comboCase">
-           <property name="toolTip">
-            <string>Test case: boundary conditions, initial condition and end time</string>
-           </property>
-          </widget>
+          <layout class="QHBoxLayout" name="horizontalLayout_21">
+           <item>
+            <widget class="QLabel" name="label_18">
+             <property name="text">
+              <string>p_back [Pa]</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="spinPback">
+             <property name="toolTip">
+              <string>Back pressure of the subsonic outlet (channel flow)</string>
+             </property>
+             <property name="minimum">
+              <double>1000.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>2000000.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>101325.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
          <item>
-          <widget class="QDoubleSpinBox" name="spinPback">
-           <property name="minimum">
-            <double>1000.000000000000000</double>
-           </property>
-           <property name="maximum">
-            <double>2000000.000000000000000</double>
-           </property>
-           <property name="value">
-            <double>101325.000000000000000</double>
+          <layout class="QHBoxLayout" name="horizontalLayout_22">
+           <item>
+            <widget class="QLabel" name="label_19">
+             <property name="text">
+              <string>Field</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="comboField"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnStop">
+           <property name="text">
+            <string>Stop</string>
            </property>
           </widget>
          </item>

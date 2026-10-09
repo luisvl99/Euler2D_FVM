@@ -1,7 +1,7 @@
 """Shared figure and table output.
 
-Every configuration keeps one colour in every figure (the same colours as
-the thesis figures).  Figures go to docs/figures/, tables to docs/results/.
+Every configuration keeps one colour in every figure.  Figures go to
+docs/figures/, tables to docs/results/.
 """
 
 import matplotlib

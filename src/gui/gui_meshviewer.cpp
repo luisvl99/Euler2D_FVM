@@ -1,6 +1,7 @@
 #include "gui_meshviewer.h"
 #include "gui_colormap.h"
 #include "gui_fieldextractor.h"
+#include <QImage>
 #include <QPainter>
 #include <QWheelEvent>
 #include <QMouseEvent>
@@ -80,52 +81,42 @@ void MeshViewer::paintEvent(QPaintEvent *)
     painter.translate(-cx, -cy);
 
     // -----------------------------------------------------------------------
-    // Draw cells (filled if a field is active, otherwise white)
+    // Field: one image pixel per cell, stretched over the domain without
+    // smoothing.  The mesh is a uniform Nx x Ny grid; image row j holds
+    // cell row j, which the flipped y axis puts at the bottom.
     // -----------------------------------------------------------------------
-    painter.setRenderHint(QPainter::Antialiasing, false);
-
-    for(const Cell& cell : mesh->cells)
-    {
-        QPolygonF poly;
-        for(int nodeID : cell.nodes)
-        {
-            const Node& node = mesh->nodes[nodeID];
-            poly << QPointF(node.x, node.y);
-        }
-
-        if(coloringEnabled)
-        {
-            double val = FieldExtractor::extract(cell, activeField);
-            double t   = ColorMap::normalize(val, fieldRange.vmin, fieldRange.vmax);
-            QColor c   = FieldExtractor::isDiverging(activeField)
-                           ? ColorMap::diverging(t)
-                           : ColorMap::sequential(t);
-
-            painter.setPen(Qt::NoPen);        // hide edges when colored
-            painter.setBrush(c);
-        }
-        else
-        {
-            painter.setPen(QPen(Qt::black, 0));
-            painter.setBrush(Qt::NoBrush);
-        }
-
-        painter.drawPolygon(poly);
-    }
-
-    // Thin black grid on top when field is active (helps keep orientation)
     if(coloringEnabled)
     {
+        const bool diverging = FieldExtractor::isDiverging(activeField);
+        QImage image(mesh->Nx, mesh->Ny, QImage::Format_RGB32);
+        for(const Cell& cell : mesh->cells)
+        {
+            const double t = ColorMap::normalize(FieldExtractor::extract(cell, activeField),
+                                                 fieldRange.vmin, fieldRange.vmax);
+            image.setPixelColor(cell.i, cell.j,
+                                diverging ? ColorMap::diverging(t) : ColorMap::sequential(t));
+        }
+        painter.drawImage(QRectF(0.0, 0.0, Lx, Ly), image);
+    }
+
+    // -----------------------------------------------------------------------
+    // Cell outlines: the wireframe when no field is shown, or a subtle grid
+    // over the field once the cells are large enough on screen to see it
+    // -----------------------------------------------------------------------
+    const double cellPixels = std::min(Lx / mesh->Nx, Ly / mesh->Ny) * scaleFactor * zoom;
+    if(!coloringEnabled || cellPixels >= 6.0)
+    {
+        painter.setRenderHint(QPainter::Antialiasing, false);
         painter.setBrush(Qt::NoBrush);
-        painter.setPen(QPen(QColor(0,0,0,40), 0));   // very subtle
+        painter.setPen(QPen(coloringEnabled ? QColor(0, 0, 0, 40) : QColor(Qt::black), 0));
 
         for(const Cell& cell : mesh->cells)
         {
             QPolygonF poly;
             for(int nodeID : cell.nodes)
             {
-                const Node& nd = mesh->nodes[nodeID];
-                poly << QPointF(nd.x, nd.y);
+                const Node& node = mesh->nodes[nodeID];
+                poly << QPointF(node.x, node.y);
             }
             painter.drawPolygon(poly);
         }
@@ -251,7 +242,8 @@ void MeshViewer::drawLegendBar(QPainter& painter, double vmin, double vmax)
     QFont fb = painter.font();
     fb.setBold(true);
     painter.setFont(fb);
-    int nx = x0 + lblW + barW/2 - fm.horizontalAdvance(name)/2;
+    // Centred over the whole panel so it stays inside it
+    int nx = panel.center().x() - QFontMetrics(fb).horizontalAdvance(name) / 2;
     painter.drawText(nx, y0 - 8, name);
 }
 

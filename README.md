@@ -1,6 +1,13 @@
 # Euler2D_FVM
 
+[![CI](https://github.com/luisvl99/Euler2D_FVM/actions/workflows/ci.yml/badge.svg)](https://github.com/luisvl99/Euler2D_FVM/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![C++17](https://img.shields.io/badge/C%2B%2B-17-informational)
+![Qt 6](https://img.shields.io/badge/GUI-Qt%206-41cd52)
+
 A finite-volume solver for the 2-D compressible Euler equations, written from scratch in C++17 with an interactive Qt 6 interface.
+
+![The GUI after a 2-D Riemann problem (Lax & Liu configuration 3), coloured by density](docs/screenshots/gui_riemann.png)
 
 I built it for my Master's thesis (TFM) in the *Master in Computational and Mathematical Engineering* (URV & UOC). The goal was educational and comparative: I derived, implemented and validated every numerical building block by hand, then measured how each numerical choice affects accuracy on the Sod shock tube.
 
@@ -31,6 +38,11 @@ The numerical method is summarised in [docs/method.md](docs/method.md).
 - Live residual-history plot (log scale).
 - Live **1-D profile viewer** (ρ, u, p along one row) for Sod, Shu–Osher and the smooth wave, with the exact solution overlaid for Sod.
 - CSV export of the residual history, full-field snapshots and 1-D line probes. Every file starts with a `#` metadata header recording the case, mesh, flow state, schemes and time.
+
+<p>
+<img src="docs/screenshots/gui_sod_profiles.png" width="56%" alt="Live profile viewer: Sod shock tube against the exact solution">
+<img src="docs/screenshots/gui_residuals.png" width="42%" alt="Residual history of a subsonic channel flow converging to a steady state">
+</p>
 
 ## Results
 
@@ -85,6 +97,10 @@ The ranking of the 8 configurations on Shu–Osher (error against an N = 6400 re
 ![2-D Riemann problems, configurations 3, 4, 6 and 12, with Rusanov / PC and HLLC / MUSCL](docs/figures/riemann2d.png)
 
 The [channel study](docs/results/channel.md) shows the supersonic and the characteristic subsonic boundary conditions converging to machine precision ([residual histories](docs/figures/channel.png)).
+
+## Download
+
+Windows binaries of the GUI and of `euler_cli` (with the Qt runtime included) are attached to each [release](https://github.com/luisvl99/Euler2D_FVM/releases). Unzip and run `bin/Euler2D_FVM.exe`. On other systems, build from source.
 
 ## Building
 
@@ -183,6 +199,10 @@ The time step is `Δt = CFL · min_C( Ω_C / Σ_faces λ_f A_f )`, where the sum
 - P. D. Lax, X.-D. Liu, "Solution of two-dimensional Riemann problems of gas dynamics by positive schemes", *SIAM J. Sci. Comput.* 19, 1998.
 - A. Kurganov, E. Tadmor, "Solution of two-dimensional Riemann problems for gas dynamics without Riemann problem solvers", *Numer. Methods Partial Differential Equations* 18, 2002.
 - F. Moukalled, L. Mangani, M. Darwish, *The Finite Volume Method in Computational Fluid Dynamics*, Springer, 2016.
+
+## Contributing
+
+Bug reports and pull requests are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md). Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## Citation
 

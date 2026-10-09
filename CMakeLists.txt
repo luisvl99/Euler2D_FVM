@@ -41,6 +41,9 @@ target_include_directories(euler_core PUBLIC src/core)
 add_executable(euler_cli src/cli/main.cpp)
 target_link_libraries(euler_cli PRIVATE euler_core)
 
+include(GNUInstallDirs)
+install(TARGETS euler_cli RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
 # ---------------------------------------------------------------------------
 # Tests: headless regression checks + command-line smoke tests
 # ---------------------------------------------------------------------------
@@ -85,16 +88,19 @@ if(EULER_BUILD_GUI)
     # The generated ui_mainwindow.h includes gui_meshviewer.h (promoted widget)
     target_include_directories(Euler2D_FVM PRIVATE src/gui)
 
-    include(GNUInstallDirs)
     install(TARGETS Euler2D_FVM
         BUNDLE  DESTINATION .
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
+    # The GUI is English-only and paints with QPainter (no OpenGL), so the
+    # Qt translations and the software OpenGL fallback are not deployed
     qt_generate_deploy_app_script(
         TARGET Euler2D_FVM
         OUTPUT_SCRIPT deploy_script
+        NO_TRANSLATIONS
         NO_UNSUPPORTED_PLATFORM_ERROR
+        DEPLOY_TOOL_OPTIONS $<$<PLATFORM_ID:Windows>:--no-opengl-sw>
     )
     install(SCRIPT ${deploy_script})
 endif()

@@ -91,7 +91,7 @@ void SodViewer::refresh(const StructuredMesh* mesh, double t)
 //    Left margin        : 60 px  (y-axis numbers)
 //    Right margin       : 20 px
 //    Bottom strip       : 34 px  (x-axis label, shown on lowest panel)
-//    Between panels     : 8 px gap
+//    Between panels     : 16 px gap
 // ===========================================================================
 
 SodViewer::PlotRect SodViewer::plotRect(int panelIdx) const
@@ -100,7 +100,7 @@ SodViewer::PlotRect SodViewer::plotRect(int panelIdx) const
     const int bottomH = 34;
     const int ml      = 60;
     const int mr      = 20;
-    const int gap     = 8;
+    const int gap     = 16;   // room for the 16 px tick labels at panel edges
 
     const int totalPlotH = height() - titleH - bottomH - 2 * gap;
     const int panelH     = totalPlotH / 3;
@@ -259,7 +259,8 @@ void SodViewer::drawPanel(QPainter& painter, const PlotRect& pr,
         }
     }
 
-    // ---- X tick labels (on every panel for readability) ----------------
+    // ---- X tick labels (bottom panel only; the panels share the x axis) --
+    if(varIdx == 2)
     {
         const int nXticks = 5;
         QFont f = painter.font();
