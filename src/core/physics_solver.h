@@ -77,8 +77,10 @@ public:
     void   setTEnd(double t) { m_tEnd = t; }
     double tEnd()      const { return m_tEnd; }
 
-    double     CFL()    const { return m_CFL;    }
-    TimeScheme scheme() const { return m_scheme; }
+    double               CFL()            const { return m_CFL;            }
+    TimeScheme           scheme()         const { return m_scheme;         }
+    FluxScheme           fluxScheme()     const { return m_fluxScheme;     }
+    ReconstructionScheme reconstruction() const { return m_reconstruction; }
 
     // -----------------------------------------------------------------------
     // Time advancement

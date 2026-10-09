@@ -17,6 +17,7 @@ option(EULER_BUILD_GUI "Build the Qt 6 GUI (needs Qt >= 6.5)" ON)
 # Solver library: mesh, physics, test cases, exact Riemann solver (no Qt)
 # ---------------------------------------------------------------------------
 add_library(euler_core STATIC
+    src/core/io_csv.h                   src/core/io_csv.cpp
     src/core/mesh_boundarytype.h
     src/core/mesh_cell.h
     src/core/mesh_face.h
@@ -34,12 +35,30 @@ add_library(euler_core STATIC
 target_include_directories(euler_core PUBLIC src/core)
 
 # ---------------------------------------------------------------------------
-# Headless regression tests
+# Command-line runner (no Qt)
+# ---------------------------------------------------------------------------
+add_executable(euler_cli src/cli/main.cpp)
+target_link_libraries(euler_cli PRIVATE euler_core)
+
+# ---------------------------------------------------------------------------
+# Tests: headless regression checks + command-line smoke tests
 # ---------------------------------------------------------------------------
 enable_testing()
 add_executable(solver_tests tests/tests.cpp)
 target_link_libraries(solver_tests PRIVATE euler_core)
 add_test(NAME solver_tests COMMAND solver_tests)
+
+add_test(NAME cli_sod
+         COMMAND euler_cli --case sod --nx 100 --out cli_runs/sod)
+set_tests_properties(cli_sod PROPERTIES PASS_REGULAR_EXPRESSION "status=t_end")
+
+add_test(NAME cli_blowup
+         COMMAND euler_cli --case sod --nx 100 --cfl 4 --out cli_runs/blowup)
+set_tests_properties(cli_blowup PROPERTIES PASS_REGULAR_EXPRESSION "status=blowup")
+
+add_test(NAME cli_bad_arguments
+         COMMAND euler_cli --case no-such-case --out cli_runs/bad)
+set_tests_properties(cli_bad_arguments PROPERTIES WILL_FAIL TRUE)
 
 # ---------------------------------------------------------------------------
 # Qt GUI

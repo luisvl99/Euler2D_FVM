@@ -369,12 +369,7 @@ void EulerSolver::buildBoundaryConditions()
         if(face.boundaryType == BoundaryType::Internal) continue;
 
         if(m_bc.count(key) == 0)
-        {
             m_bc[key] = BoundaryConditionFactory::create(face.boundaryType);
-            std::cout << "[EulerSolver] BC registered: "
-                      << m_bc[key]->name()
-                      << "  (type " << key << ")\n";
-        }
     }
 }
 

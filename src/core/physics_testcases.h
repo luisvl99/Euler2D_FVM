@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "mesh_structured.h"
 #include "physics_flowparameters.h"
 
@@ -41,3 +43,14 @@ constexpr double SHU_OSHER_LX = 10.0;
 // Returns t_end (1e30 for Channel, which has no natural end time)
 double applyTestCase(TestCase tc, StructuredMesh& mesh, FlowParameters& fp,
                      bool subsonic);
+
+// Short identifier used in file metadata and on the command line:
+// channel, sod, shu-osher, riemann3, riemann4, riemann6, riemann12
+const char* testCaseId(TestCase tc);
+
+// Inverse of testCaseId(); returns false for an unknown identifier
+bool testCaseFromId(const std::string& id, TestCase& tc);
+
+// Default mesh of each case (the canonical domain where there is one)
+struct MeshSize { int Nx; int Ny; double Lx; double Ly; };
+MeshSize canonicalMesh(TestCase tc);

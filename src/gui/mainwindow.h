@@ -63,8 +63,8 @@ private:
     std::vector<CellSnapshot> m_snapshots;
     int                       m_snapshotEvery = 100;
 
-    // Parameters captured at Run-time for export metadata
-    SimParameters m_simParams;
+    // Export metadata of the current run (set when Run is clicked)
+    RunInfo m_runInfo;
 
     //Residual plotter
     ResidualPlotter* m_residualPlotter = nullptr;
@@ -75,8 +75,6 @@ private:
     // -----------------------------------------------------------------------
     void setControlsEnabled(bool running);  // grey-out UI while solver runs
     void updateStatusLabel();               // refresh lblStatus text
-
-    SimParameters buildSimParams(const FlowParameters& fp) const;   // needs a mesh
 
     // Capture a snapshot of the current cell states
     void storeSnapshot(int iter, double simTime);

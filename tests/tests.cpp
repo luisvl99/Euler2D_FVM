@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
-#include <iostream>
+#include <exception>
 
 static int failures = 0;
 
@@ -342,10 +342,6 @@ static void runTests()
 
 int main()
 {
-    // Silence the solver's informational std::cout logging: it interleaves
-    // with printf here.  Warnings still go to std::cerr.
-    std::cout.setstate(std::ios::badbit);
-
     // A run that blows up throws; report it instead of aborting
     try
     {

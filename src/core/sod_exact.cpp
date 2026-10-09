@@ -132,9 +132,6 @@ void SodExact::solve()
     m_uStar = 0.5 * (m_L.u + m_R.u)
               + 0.5 * (f(p, m_R, aR) - f(p, m_L, aL));
     m_solved = true;
-
-    std::cout << "[SodExact] p* = " << m_pStar
-              << "  u* = " << m_uStar << "\n";
 }
 
 // ===========================================================================

@@ -195,17 +195,16 @@ void MainWindow::on_btnRunSolver_clicked()
     // Boundary tags + initial condition — must happen BEFORE building the
     // solver (its constructor registers one BC object per BoundaryType)
     // ------------------------------------------------------------------
-    const double tEnd = applyTestCase(tc, *mesh, fp, ui->checkSubsonic->isChecked());
-
-    m_simParams = buildSimParams(fp);
+    const bool   subsonic = ui->checkSubsonic->isChecked();
+    const double tEnd     = applyTestCase(tc, *mesh, fp, subsonic);
 
     // ------------------------------------------------------------------
     // Build solver
     // ------------------------------------------------------------------
     solver = std::make_unique<EulerSolver>(mesh.get(), fp);
-    solver->setCFL(m_simParams.CFL);
+    solver->setCFL(ui->spinCFL->value());
     solver->setTimeScheme(
-        m_simParams.scheme == "RK2"
+        ui->comboScheme->currentData().toString() == "RK2"
             ? EulerSolver::TimeScheme::RK2
             : EulerSolver::TimeScheme::ForwardEuler);
 
@@ -227,6 +226,11 @@ void MainWindow::on_btnRunSolver_clicked()
     m_snapshots.clear();
     m_snapshotEvery  = ui->spinSnapshotEvery->value();
     m_maxIter        = ui->spinMaxIter->value();
+
+    // Export metadata, taken from the mesh, flow and solver actually used
+    m_runInfo               = makeRunInfo(tc, subsonic, *mesh, fp, *solver);
+    m_runInfo.maxIter       = m_maxIter;
+    m_runInfo.snapshotEvery = m_snapshotEvery;
     m_stepsPerFrame  = ui->spinStepsPerFrame->value();
     m_currentIter    = 0;
     storeSnapshot(0, 0.0);
@@ -385,11 +389,11 @@ void MainWindow::on_comboCase_currentIndexChanged(int index)
     const TestCase tc = static_cast<TestCase>(ui->comboCase->itemData(index).toInt());
     if(tc == TestCase::Channel || tc == TestCase::Sod) return;   // any domain works
 
-    const bool shuOsher = (tc == TestCase::ShuOsher);
-    ui->spinNx->setValue(shuOsher ? 400  : 200);
-    ui->spinNy->setValue(shuOsher ? 1    : 200);
-    ui->spinLx->setValue(shuOsher ? SHU_OSHER_LX : 1.0);
-    ui->spinLy->setValue(1.0);
+    const MeshSize m = canonicalMesh(tc);
+    ui->spinNx->setValue(m.Nx);
+    ui->spinNy->setValue(m.Ny);
+    ui->spinLx->setValue(m.Lx);
+    ui->spinLy->setValue(m.Ly);
 
     // Let the run stop at the case's end time, not at the iteration cap
     ui->spinMaxIter->setValue(std::max(ui->spinMaxIter->value(), 100000));
@@ -427,8 +431,8 @@ void MainWindow::on_btnExport_clicked()
         {
             QString err;
             QString path = dir + "/residuals.csv";
-            if(ExportManager::writeResiduals(path, solver->residualHistory(),
-                                              solver->dtHistory(), m_simParams, &err))
+            if(ExportManager::writeResiduals(path, m_runInfo, solver->residualHistory(),
+                                             solver->dtHistory(), &err))
                 ++written;
             else { ++failed; errors << err; }
         }
@@ -449,7 +453,7 @@ void MainWindow::on_btnExport_clicked()
                 .arg(dir)
                     .arg(snap.iter, 7, 10, QChar('0'));
                 QString err;
-                if(ExportManager::writeSnapshot(path, mesh.get(), snap, m_simParams, &err))
+                if(ExportManager::writeSnapshot(path, m_runInfo, *mesh, snap, &err))
                     ++written;
                 else { ++failed; errors << err; }
             }
@@ -473,8 +477,7 @@ void MainWindow::on_btnExport_clicked()
                     .arg(jRow,      2, 10, QChar('0'))
                     .arg(snap.iter, 7, 10, QChar('0'));
                 QString err;
-                if(ExportManager::writeLineProbe(path, mesh.get(), snap, jRow,
-                                                  m_simParams, &err))
+                if(ExportManager::writeLineProbe(path, m_runInfo, *mesh, snap, jRow, &err))
                     ++written;
                 else { ++failed; errors << err; }
             }
@@ -508,34 +511,6 @@ void MainWindow::storeSnapshot(int iter, double simTime)
         snap.cells[k] = mesh->cells[k].U;
 
     m_snapshots.push_back(std::move(snap));
-}
-
-// Export metadata for the run being started.  Mesh and flow data come from
-// the objects actually used, not from the spin boxes: picking a case changes
-// the mesh spin boxes without regenerating the mesh, and every case except
-// Channel replaces the GUI flow state with its own.
-SimParameters MainWindow::buildSimParams(const FlowParameters& fp) const
-{
-    SimParameters p;
-    p.Nx  = mesh->Nx;
-    p.Ny  = mesh->Ny;
-    p.Lx  = mesh->Lx;
-    p.Ly  = mesh->Ly;
-
-    p.rho_inf = fp.rho_inf;
-    p.u_inf   = fp.u_inf;
-    p.v_inf   = fp.v_inf;
-    p.p_inf   = fp.p_inf;
-
-    p.CFL           = ui->spinCFL->value();
-    p.scheme        = ui->comboScheme->currentData().toString();
-    p.maxIter       = ui->spinMaxIter->value();
-    p.snapshotEvery = ui->spinSnapshotEvery->value();
-
-    p.fluxScheme    = ui->comboFluxScheme->currentData().toString();
-    p.reconstruction = ui->comboReconstruction->currentData().toString();
-
-    return p;
 }
 
 void MainWindow::setControlsEnabled(bool running)

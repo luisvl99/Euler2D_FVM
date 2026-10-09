@@ -27,7 +27,7 @@ I built it for my Master's thesis (TFM) in the *Master in Computational and Math
 - Colour maps of ρ, |V|, u, v, p, Mach, specific total energy and residual |R|, with zoom and pan.
 - Live residual-history plot (log scale).
 - Live **1-D profile viewer** (ρ, u, p along one row) for Sod and Shu–Osher, with the exact solution overlaid for Sod.
-- CSV export of the residual history, full-field snapshots and 1-D line probes. Every file starts with a `#` metadata header recording the mesh, the schemes and the time.
+- CSV export of the residual history, full-field snapshots and 1-D line probes. Every file starts with a `#` metadata header recording the case, mesh, flow state, schemes and time.
 
 ## Results (Sod shock tube, t = 0.2)
 
@@ -64,11 +64,21 @@ cmake --build build
 
 You can also open `CMakeLists.txt` directly in Qt Creator.
 
-Without Qt, turn the GUI off. The solver library and the tests still build:
+Without Qt, turn the GUI off. The solver library, the command-line runner and the tests still build:
 
 ```bash
 cmake -S . -B build -DEULER_BUILD_GUI=OFF
 ```
+
+### Command-line runner
+
+`euler_cli` runs one case without the GUI and writes the same CSV files as the GUI export, plus a `run.json` summary. This makes parameter studies scriptable:
+
+```bash
+build/euler_cli --case sod --flux hllc --recon muscl --time rk2 --cfl 0.5 --nx 200 --out runs/sod
+```
+
+Every option has a default (the case's canonical mesh, HLLC + MUSCL + SSP-RK2, CFL 0.5); `euler_cli --help` lists them. The exit code is 0 when the run finishes, 1 for invalid arguments and 2 when the solution blows up, so scripts can detect unstable settings.
 
 ### Tests
 
@@ -109,7 +119,7 @@ The time step is `Δt = CFL · min_C( Ω_C / Σ_faces λ_f A_f )`, where the sum
 
 ## Code layout
 
-`src/core/` is the solver library (`euler_core`, no Qt). `src/gui/` is the Qt application, which links it.
+`src/core/` is the solver library (`euler_core`, no Qt). The Qt application (`src/gui/`) and the command-line runner (`src/cli/`) both link it.
 
 | Files | Purpose |
 |-------|---------|
@@ -121,8 +131,10 @@ The time step is `Δt = CFL · min_C( Ω_C / Σ_faces λ_f A_f )`, where the sum
 | `src/core/physics_solver.*` | Residual assembly, MUSCL reconstruction, time step, FE / SSP-RK2, blow-up check |
 | `src/core/physics_testcases.*` | Test cases: boundary tags, initial conditions, end times |
 | `src/core/sod_exact.*` | Exact Riemann solver |
+| `src/core/io_csv.*` | CSV output with the `#` metadata header (shared by the GUI and the CLI) |
 | `src/gui/` | Qt interface: main window, mesh viewer, residual plot, 1-D profile viewer, CSV export |
-| `tests/tests.cpp` | Headless regression checks |
+| `src/cli/main.cpp` | Command-line runner `euler_cli` |
+| `tests/tests.cpp` | Headless regression checks (plus CLI smoke tests in CMake) |
 
 ## References
 

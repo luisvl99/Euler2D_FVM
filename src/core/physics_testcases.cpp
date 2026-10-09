@@ -118,3 +118,43 @@ double applyTestCase(TestCase tc, StructuredMesh& mesh, FlowParameters& fp,
     fp.buildDerived();
     return tEnd;
 }
+
+namespace {
+
+struct CaseEntry { TestCase tc; const char* id; MeshSize mesh; };
+
+const CaseEntry CASES[] = {
+    {TestCase::Channel,   "channel",   {100,  20, 1.0,          0.2}},
+    {TestCase::Sod,       "sod",       {200,   1, 1.0,          1.0}},
+    {TestCase::ShuOsher,  "shu-osher", {400,   1, SHU_OSHER_LX, 1.0}},
+    {TestCase::Riemann3,  "riemann3",  {200, 200, 1.0,          1.0}},
+    {TestCase::Riemann4,  "riemann4",  {200, 200, 1.0,          1.0}},
+    {TestCase::Riemann6,  "riemann6",  {200, 200, 1.0,          1.0}},
+    {TestCase::Riemann12, "riemann12", {200, 200, 1.0,          1.0}},
+};
+
+const CaseEntry& entry(TestCase tc)
+{
+    for(const CaseEntry& e : CASES)
+        if(e.tc == tc) return e;
+    return CASES[0];   // unreachable: every enum value is listed
+}
+
+} // anonymous namespace
+
+const char* testCaseId(TestCase tc)
+{
+    return entry(tc).id;
+}
+
+bool testCaseFromId(const std::string& id, TestCase& tc)
+{
+    for(const CaseEntry& e : CASES)
+        if(id == e.id) { tc = e.tc; return true; }
+    return false;
+}
+
+MeshSize canonicalMesh(TestCase tc)
+{
+    return entry(tc).mesh;
+}
