@@ -94,13 +94,18 @@ if(EULER_BUILD_GUI)
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
     # The GUI is English-only and paints with QPainter (no OpenGL), so the
-    # Qt translations and the software OpenGL fallback are not deployed
+    # Qt translations and, on Windows, the software OpenGL fallback are not
+    # deployed (DEPLOY_TOOL_OPTIONS needs Qt 6.7)
+    set(deploy_tool_options "")
+    if(WIN32 AND Qt6_VERSION VERSION_GREATER_EQUAL 6.7)
+        set(deploy_tool_options DEPLOY_TOOL_OPTIONS --no-opengl-sw)
+    endif()
     qt_generate_deploy_app_script(
         TARGET Euler2D_FVM
         OUTPUT_SCRIPT deploy_script
         NO_TRANSLATIONS
         NO_UNSUPPORTED_PLATFORM_ERROR
-        DEPLOY_TOOL_OPTIONS $<$<PLATFORM_ID:Windows>:--no-opengl-sw>
+        ${deploy_tool_options}
     )
     install(SCRIPT ${deploy_script})
 endif()
