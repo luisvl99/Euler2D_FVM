@@ -1,0 +1,9 @@
+# Build output / IDE
+build/
+.qtcreator/
+*.user
+
+# Kept locally, not published: thesis sources, Python post-processing, Claude's notes
+thesis/
+postprocessing/
+CLAUDE_NOTES.md
