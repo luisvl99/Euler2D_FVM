@@ -1,0 +1,4 @@
+Run,residual drop (decades),u inlet,u outlet,p outlet,mass flux in,mass flux out
+"supersonic, u = 600 m/s",14.50637557683844,600.0,600.0,101325.0,735.0,735.0
+"subsonic, u = 68 m/s, p_back = p",13.69858998759921,68.0,68.0,101325.0,83.3,83.3
+"subsonic, u = 68 m/s, p_back = 0.99 p",13.70150609424757,70.44054856999999,70.44054856999999,100312.0,85.6725853914034,85.6725853914034

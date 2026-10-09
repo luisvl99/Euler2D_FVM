@@ -22,16 +22,23 @@ I built it for my Master's thesis (TFM) in the *Master in Computational and Math
 | Sod shock tube | Rarefaction, contact and shock against the exact solution | any, membrane at Lx/2 | 0.2 |
 | Shu–Osher | Mach 3 shock running into a density wave: how well small-scale structure behind a shock survives the limiter | x ∈ [−5, 5] → `Lx = 10` | 1.8 |
 | 2-D Riemann, configs 3, 4, 6, 12 (Lax & Liu) | Genuinely 2-D interactions of shocks, contacts and vortex sheets | unit square | 0.3 / 0.25 / 0.3 / 0.25 |
+| Smooth wave | Order of accuracy: a Gaussian density bump advected at u = 2, with a smooth exact solution | any | 0.2 · Lx |
 
 **GUI**
 - Colour maps of ρ, |V|, u, v, p, Mach, specific total energy and residual |R|, with zoom and pan.
 - Live residual-history plot (log scale).
-- Live **1-D profile viewer** (ρ, u, p along one row) for Sod and Shu–Osher, with the exact solution overlaid for Sod.
+- Live **1-D profile viewer** (ρ, u, p along one row) for Sod, Shu–Osher and the smooth wave, with the exact solution overlaid for Sod.
 - CSV export of the residual history, full-field snapshots and 1-D line probes. Every file starts with a `#` metadata header recording the case, mesh, flow state, schemes and time.
 
-## Results (Sod shock tube, t = 0.2)
+## Results
 
-Domain `Lx = 1` with N = 200 cells (`Ny = 1`), CFL = 0.5 (see the note on the CFL number below). L1 is the mean absolute error over the cell centres against the exact solution. Sorted from least to most accurate:
+Every figure and table below is produced by the scripts in [`analysis/`](analysis/README.md) with the current code (`python analysis/run_all.py`); the tables are also in [`docs/results`](docs/results). L1 is the mean absolute error over the cells. Unless stated otherwise, CFL = 0.5 (see the note on the CFL number below).
+
+### Sod shock tube (t = 0.2)
+
+![Sod shock tube: density of the 8 configurations against the exact solution](docs/figures/sod_schemes.png)
+
+Domain `Lx = 1` with N = 200 cells (`Ny = 1`), sorted from least to most accurate:
 
 | Flux    | Reconstruction | Time scheme   | L1(ρ)    | L1(p)    |
 |---------|----------------|---------------|----------|----------|
@@ -44,11 +51,38 @@ Domain `Lx = 1` with N = 200 cells (`Ny = 1`), CFL = 0.5 (see the note on the CF
 | HLLC    | MUSCL          | SSP-RK2       | 0.004542 | 0.003450 |
 | HLLC    | MUSCL          | Forward Euler | 0.003406 | 0.002412 |
 
-Main findings:
 - **Reconstruction dominates.** Switching from piecewise constant to MUSCL cuts the density error by 3–3.6×.
 - **Flux comes second.** HLLC improves on Rusanov by 20–30 %, mostly at the contact discontinuity.
-- **On Sod, Forward Euler beats SSP-RK2** at this CFL. Its truncation error is anti-diffusive and cancels part of the spatial diffusion, as the modified equation shows. This does not carry over to smooth flow: on a smooth density wave, MUSCL + Forward Euler is only first order, while MUSCL + SSP-RK2 converges at about second order (observed 1.9) and is about 13× more accurate at N = 800.
-- **With discontinuities, L1 converges more slowly than first order.** From N = 200 to 1600 the observed rate is about 0.65 for piecewise constant and 0.82–0.87 for MUSCL. The smeared contact discontinuity dominates the error.
+- **On Sod, Forward Euler beats SSP-RK2** at this CFL. Its truncation error is anti-diffusive and cancels part of the spatial diffusion, as the modified equation shows. This does not carry over to smooth flow (next section).
+
+### Order of accuracy
+
+<p>
+<img src="docs/figures/smooth_order.png" width="49%" alt="Order of accuracy on the smooth wave">
+<img src="docs/figures/sod_convergence.png" width="49%" alt="Mesh convergence on Sod">
+</p>
+
+- **Smooth flow (left).** Piecewise constant converges at first order (0.92–0.96 between N = 800 and 1600). MUSCL reaches about second order (1.9) only with SSP-RK2; with Forward Euler the time error dominates and the order drops to 1.0. At N = 1600, MUSCL + SSP-RK2 is 10× more accurate than MUSCL + Forward Euler.
+- **With discontinuities (right),** L1 converges more slowly than first order: about 0.65 for piecewise constant and 0.82–0.86 for MUSCL (N = 200 → 1600). The smeared contact discontinuity dominates the error.
+- **Cost.** For the same Sod error, MUSCL on a coarse mesh is far cheaper than piecewise constant on a fine one: HLLC + MUSCL reaches L1(ρ) ≈ 3.4·10⁻³ with 200 cells, where HLLC + PC needs 1600 cells and about 40× more run time ([figure](docs/figures/sod_cost.png)).
+
+### CFL number
+
+![L1 error of density against the CFL number for the 8 configurations](docs/figures/cfl_sweep.png)
+
+- Every configuration runs to t = 0.2 up to CFL 2.1, which matches the classical Courant limit of 1 (see the note below).
+- Forward Euler + piecewise constant gets *more* accurate as the CFL grows (less numerical diffusion). With MUSCL, Forward Euler is most accurate near CFL 0.9 and degrades quickly above it. SSP-RK2 is almost independent of the CFL up to about 1.5.
+- Some HLLC runs survive up to CFL 2.8 but with growing errors: finishing without a non-physical state does not mean the scheme is stable or accurate there.
+
+### Shu–Osher and 2-D Riemann problems
+
+![Shu–Osher: density of the 8 configurations against a fine reference](docs/figures/shu_osher.png)
+
+The ranking of the 8 configurations on Shu–Osher (error against an N = 6400 reference) is the same as on Sod. Rusanov + piecewise constant almost erases the entropy waves behind the shock (density range 3.78–3.93 against 3.05–4.66 in the reference). Rusanov even damps the stationary density wave ahead of the shock (amplitude 0.12 instead of 0.2 with piecewise constant), which HLLC keeps exactly.
+
+![2-D Riemann problems, configurations 3, 4, 6 and 12, with Rusanov / PC and HLLC / MUSCL](docs/figures/riemann2d.png)
+
+The [channel study](docs/results/channel.md) shows the supersonic and the characteristic subsonic boundary conditions converging to machine precision ([residual histories](docs/figures/channel.png)).
 
 ## Building
 
@@ -108,7 +142,7 @@ ctest --test-dir build --output-on-failure
 2. Choose the flux, reconstruction, time scheme and CFL.
 3. Pick a **case** (see the table above). Each case sets its own boundary conditions, initial condition and end time:
    - **Channel flow** has an inlet on the left, an outlet on the right and slip walls top and bottom. The flow starts at rest with the GUI ρ and p. **Subsonic BCs** switches the inlet and outlet to the characteristic versions, which use the back pressure *p_back*.
-   - **Sod** and **Shu–Osher** are 1-D: a single row (`Ny = 1`) is enough. A live ρ/u/p profile window opens, with the exact solution overlaid for Sod.
+   - **Sod**, **Shu–Osher** and the **smooth wave** are 1-D: a single row (`Ny = 1`) is enough. A live ρ/u/p profile window opens, with the exact solution overlaid for Sod.
    - Selecting **Shu–Osher** or a **2-D Riemann** configuration pre-fills its canonical mesh and switches the view to density. You still need to click **Generate Mesh**. If you run Shu–Osher on a mesh whose length is not `Lx = 10`, the GUI warns you and asks before running.
 4. Click **Run Solver**. **Stop** can interrupt it at any time. If a cell's density or pressure stops being positive, the run stops and reports the cell, step and time; the failed field stays on screen.
 5. To export, choose a directory and tick residuals, snapshots and/or a line probe (row *j*). The files open directly in pandas with `pd.read_csv(path, comment="#")`.
@@ -135,6 +169,7 @@ The time step is `Δt = CFL · min_C( Ω_C / Σ_faces λ_f A_f )`, where the sum
 | `src/gui/` | Qt interface: main window, mesh viewer, residual plot, 1-D profile viewer, CSV export |
 | `src/cli/main.cpp` | Command-line runner `euler_cli` |
 | `tests/tests.cpp` | Headless regression checks (plus CLI smoke tests in CMake) |
+| `analysis/` | Python studies that drive `euler_cli` and produce `docs/figures` and `docs/results` |
 
 ## References
 

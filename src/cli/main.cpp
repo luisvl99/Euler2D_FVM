@@ -32,7 +32,7 @@ Runs one test case and writes CSV files (same format as the GUI export)
 and run.json into DIR.
 
   --case NAME          channel | sod | shu-osher | riemann3 | riemann4 |
-                       riemann6 | riemann12
+                       riemann6 | riemann12 | smooth-wave
   --out DIR            output directory (created if needed)
 
   --nx N  --ny N       cells                     [canonical mesh of the case]

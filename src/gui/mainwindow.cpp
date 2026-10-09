@@ -74,6 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->comboCase->addItem("2-D Riemann, config 4",  (int)TestCase::Riemann4);
     ui->comboCase->addItem("2-D Riemann, config 6",  (int)TestCase::Riemann6);
     ui->comboCase->addItem("2-D Riemann, config 12", (int)TestCase::Riemann12);
+    ui->comboCase->addItem("Smooth wave (order test)", (int)TestCase::SmoothWave);
 
     // -----------------------------------------------------------------------
     // Export menu
@@ -241,7 +242,7 @@ void MainWindow::on_btnRunSolver_clicked()
     delete m_sodViewer;
     m_sodViewer = nullptr;
 
-    if(tc == TestCase::Sod || tc == TestCase::ShuOsher)
+    if(tc == TestCase::Sod || tc == TestCase::ShuOsher || tc == TestCase::SmoothWave)
     {
         m_sodViewer = new SodViewer(this);
         m_sodViewer->setWindowFlags(Qt::Window);
@@ -387,7 +388,8 @@ void MainWindow::on_comboField_currentIndexChanged(int index)
 void MainWindow::on_comboCase_currentIndexChanged(int index)
 {
     const TestCase tc = static_cast<TestCase>(ui->comboCase->itemData(index).toInt());
-    if(tc == TestCase::Channel || tc == TestCase::Sod) return;   // any domain works
+    if(tc == TestCase::Channel || tc == TestCase::Sod || tc == TestCase::SmoothWave)
+        return;   // any domain works
 
     const MeshSize m = canonicalMesh(tc);
     ui->spinNx->setValue(m.Nx);

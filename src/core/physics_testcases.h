@@ -23,6 +23,10 @@
 //               Four constant quadrants meeting at the domain centre,
 //               transmissive (zero-gradient) boundaries on all sides.
 //               Canonical domain: unit square.
+//    SmoothWave Gaussian density bump advected at u = 2 with p = 1
+//               (supersonic, so the inlet and outlet are exact).  Smooth
+//               exact solution smoothWaveDensity(x, t, Lx): the order-of-
+//               accuracy test.  t_end = 0.2 Lx
 // ---------------------------------------------------------------------------
 
 enum class TestCase
@@ -33,8 +37,12 @@ enum class TestCase
     Riemann3,    // four shocks                       t_end = 0.3
     Riemann4,    // four shocks                       t_end = 0.25
     Riemann6,    // four contacts (vortex sheets)     t_end = 0.3
-    Riemann12    // two shocks + two contacts         t_end = 0.25
+    Riemann12,   // two shocks + two contacts         t_end = 0.25
+    SmoothWave
 };
+
+// Exact density of SmoothWave: 1 + 0.2 exp(-((x - 2t - 0.3 Lx) / (0.08 Lx))^2)
+double smoothWaveDensity(double x, double t, double Lx);
 
 // Domain length Shu-Osher needs: its shock and density wave sit at absolute
 // positions of the canonical domain x in [-5, 5]

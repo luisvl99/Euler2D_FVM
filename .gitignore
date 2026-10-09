@@ -7,3 +7,7 @@ build/
 thesis/
 postprocessing/
 CLAUDE_NOTES.md
+
+# Cached euler_cli runs of the analysis scripts (regenerated on demand)
+analysis/runs/
+__pycache__/

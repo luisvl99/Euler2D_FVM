@@ -98,6 +98,19 @@ double applyTestCase(TestCase tc, StructuredMesh& mesh, FlowParameters& fp,
         break;
     }
 
+    case TestCase::SmoothWave:
+    {
+        // The bump is ~1e-16 at both ends, so the constant inlet state and
+        // the zero-gradient outlet are exact
+        mesh.setBoundaries(BoundaryType::Inlet, BoundaryType::Outlet,
+                           BoundaryType::Wall);
+        for(Cell& c : mesh.cells)
+            setCell(c, {smoothWaveDensity(c.cx, 0.0, mesh.Lx), 2.0, 0.0, 1.0});
+        setFlow(fp, {1.0, 2.0, 0.0, 1.0});
+        tEnd = 0.2 * mesh.Lx;
+        break;
+    }
+
     default: // 2-D Riemann problems
     {
         const RiemannConfig cfg = riemannConfig(tc);
@@ -119,6 +132,12 @@ double applyTestCase(TestCase tc, StructuredMesh& mesh, FlowParameters& fp,
     return tEnd;
 }
 
+double smoothWaveDensity(double x, double t, double Lx)
+{
+    const double s = (x - 2.0 * t - 0.3 * Lx) / (0.08 * Lx);
+    return 1.0 + 0.2 * std::exp(-s * s);
+}
+
 namespace {
 
 struct CaseEntry { TestCase tc; const char* id; MeshSize mesh; };
@@ -131,6 +150,7 @@ const CaseEntry CASES[] = {
     {TestCase::Riemann4,  "riemann4",  {200, 200, 1.0,          1.0}},
     {TestCase::Riemann6,  "riemann6",  {200, 200, 1.0,          1.0}},
     {TestCase::Riemann12, "riemann12", {200, 200, 1.0,          1.0}},
+    {TestCase::SmoothWave, "smooth-wave", {200, 1, 1.0,         1.0}},
 };
 
 const CaseEntry& entry(TestCase tc)
