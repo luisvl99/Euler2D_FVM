@@ -13,7 +13,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Configure (no GUI)
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DEULER_BUILD_GUI=OFF
@@ -28,7 +28,7 @@ jobs:
     name: Qt GUI build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install OpenGL headers (needed by Qt Gui)
         run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libxkbcommon-dev
@@ -48,9 +48,9 @@ jobs:
     name: Analysis scripts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 

@@ -82,6 +82,8 @@ if(EULER_BUILD_GUI)
         src/gui/gui_sodviewer.h         src/gui/gui_sodviewer.cpp
     )
     target_link_libraries(Euler2D_FVM PRIVATE euler_core Qt::Core Qt::Widgets)
+    # The generated ui_mainwindow.h includes gui_meshviewer.h (promoted widget)
+    target_include_directories(Euler2D_FVM PRIVATE src/gui)
 
     include(GNUInstallDirs)
     install(TARGETS Euler2D_FVM
