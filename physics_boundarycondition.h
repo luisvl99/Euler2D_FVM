@@ -19,8 +19,8 @@
 //
 //  The ghost state is a fictitious conserved state on the "outside" of the
 //  boundary face.  The residual assembly loop passes (U_real, U_ghost) to
-//  rusanovFlux exactly as it would for an internal face.  All stability and
-//  conservation properties of the Rusanov flux carry over automatically.
+//  the numerical flux (Rusanov or HLLC) exactly as it would for an internal
+//  face, so the flux's stability and conservation properties carry over.
 //
 //  Design rules
 //  ------------
@@ -102,10 +102,10 @@ protected:
 //    ρ^ghost    =  ρ^real
 //    p^ghost    =  p^real
 //
-//  Effect on the Rusanov flux: the average normal velocity at the face is
-//  0.5*(u_n + (-u_n)) = 0, so the mass flux through the wall is exactly
-//  zero.  The pressure term still contributes — this is the wall pressure
-//  force on the cell.
+//  Effect on the flux: the average normal velocity at the face is
+//  0.5*(u_n + (-u_n)) = 0 (Rusanov), and HLLC finds S* = 0 by symmetry, so
+//  the mass flux through the wall is zero.  The pressure term still
+//  contributes — this is the wall pressure force on the cell.
 // ---------------------------------------------------------------------------
 
 class BC_Wall : public BoundaryCondition
@@ -138,32 +138,13 @@ public:
 // BC_Symmetry  —  symmetry plane
 //
 //  Mathematically identical to the slip wall: reflect the normal velocity.
-//  Kept as a separate class because it represents a different physical
+//  Kept as a separate type because it represents a different physical
 //  intent (the domain is symmetric across this line, not bounded by a wall).
-//  Having it separate also makes boundary labelling in the GUI unambiguous.
 // ---------------------------------------------------------------------------
 
-class BC_Symmetry : public BoundaryCondition
+class BC_Symmetry : public BC_Wall
 {
 public:
-
-    EulerState ghostState(const EulerState&    U_real,
-                          const Face&          face,
-                          const FlowParameters& /*params*/) const override
-    {
-        double rho = U_real.rho;
-        double u   = U_real.rho_u / rho;
-        double v   = U_real.rho_v / rho;
-        double p   = EulerPhysics::pressure(U_real);
-
-        auto [un, utx, uty] = decomposeVelocity(u, v, face.nx, face.ny);
-
-        double u_ghost = utx - un * face.nx;
-        double v_ghost = uty - un * face.ny;
-
-        return EulerPhysics::primitiveToConserved(rho, u_ghost, v_ghost, p);
-    }
-
     const char* name() const override { return "Symmetry"; }
 };
 
@@ -178,8 +159,8 @@ public:
 //  Ghost state: the prescribed free-stream / inlet conserved state.
 //
 //  Note: for a SUBSONIC inlet only three variables should be prescribed
-//  (one is determined by the interior via a Riemann invariant).  That
-//  refinement can be added later as BC_InletSubsonic.
+//  (one is determined by the interior via a Riemann invariant); see
+//  BC_InletSubsonic.
 // ---------------------------------------------------------------------------
 
 class BC_Inlet : public BoundaryCondition
@@ -209,8 +190,7 @@ public:
 //  Ghost state: U_ghost = U_real
 //
 //  Note: for a SUBSONIC outlet one characteristic re-enters the domain and
-//  the back-pressure must be prescribed.  That refinement can be added
-//  later as BC_OutletSubsonic.
+//  the back-pressure must be prescribed; see BC_OutletSubsonic.
 // ---------------------------------------------------------------------------
 
 class BC_Outlet : public BoundaryCondition
@@ -229,29 +209,18 @@ public:
 
 
 // ---------------------------------------------------------------------------
-// BC_Farfield  —  far-field (supersonic, simple version)
+// BC_Farfield  —  far-field (simple version)
 //
-//  For supersonic far-field the treatment is identical to the inlet:
-//  the prescribed free-stream state is used as the ghost.
-//
-//  A proper subsonic far-field using Riemann invariants (characteristic
-//  decomposition) will be implemented later as BC_FarfieldSubsonic.
-//  The factory can return that class instead of this one once it exists,
-//  without changing any call site.
+//  Same ghost state as the supersonic inlet: the prescribed free-stream
+//  state.  Exact for supersonic flow and for a uniform free stream.  A
+//  characteristic (Riemann-invariant) far-field for subsonic flow is not
+//  implemented; the factory would return it instead of this class.
 // ---------------------------------------------------------------------------
 
-class BC_Farfield : public BoundaryCondition
+class BC_Farfield : public BC_Inlet
 {
 public:
-
-    EulerState ghostState(const EulerState&    /*U_real*/,
-                          const Face&          /*face*/,
-                          const FlowParameters& params) const override
-    {
-        return params.U_inlet;
-    }
-
-    const char* name() const override { return "Far-field (supersonic)"; }
+    const char* name() const override { return "Far-field (free-stream state)"; }
 };
 
 
@@ -444,11 +413,16 @@ public:
     const char* name() const override { return "Outlet (subsonic, characteristic)"; }
 };
 
-class BC_ZeroGradient : public BoundaryCondition {
+// ---------------------------------------------------------------------------
+// BC_ZeroGradient  —  transmissive boundary
+//
+//  Same ghost state as the supersonic outlet (U_ghost = U_real), used on
+//  sides where waves should leave without reflection (Sod, 2-D Riemann).
+// ---------------------------------------------------------------------------
+
+class BC_ZeroGradient : public BC_Outlet
+{
 public:
-    EulerState ghostState(const EulerState& U_real,
-                          const Face&, const FlowParameters&) const override
-    { return U_real; }
     const char* name() const override { return "Zero-gradient (extrapolation)"; }
 };
 

@@ -6,7 +6,7 @@
 #include <QMouseEvent>
 #include <QFontMetrics>
 
-    MeshViewer::MeshViewer(QWidget *parent)
+MeshViewer::MeshViewer(QWidget *parent)
     : QWidget(parent)
 {
 }

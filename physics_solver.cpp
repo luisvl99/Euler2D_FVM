@@ -21,7 +21,6 @@ EulerSolver::EulerSolver(StructuredMesh* mesh, const FlowParameters& params)
         throw std::runtime_error("EulerSolver: null mesh pointer.");
 
     buildBoundaryConditions();
-    m_U0.resize(m_mesh->cells.size());
 }
 
 // ===========================================================================
@@ -40,9 +39,11 @@ void EulerSolver::setTimeScheme(TimeScheme scheme)
 
 void EulerSolver::setCFL(double cfl)
 {
+    // This CFL is about twice the classical Courant number, so the
+    // linear stability limit is about 2
     if(cfl <= 0.0 || cfl > 2.0)
         std::cerr << "[EulerSolver] WARNING: CFL=" << cfl
-                  << " is outside the recommended range (0, 1].\n";
+                  << " is outside the stable range (0, 2].\n";
     m_CFL = cfl;
 }
 

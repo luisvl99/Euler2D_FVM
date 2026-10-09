@@ -3,19 +3,19 @@
 #include <cmath>
 #include <algorithm>
 
-    // ---------------------------------------------------------------------------
-    // Colormap
-    //
-    //  Two palettes:
-    //    Sequential  – jet-like blue→cyan→green→yellow→red  (density, p, Mach…)
-    //    Diverging   – blue→white→red  (signed fields: u, v, residual)
-    //
-    //  Usage:
-    //    double t = ColorMap::normalize(value, minVal, maxVal);
-    //    QColor c = ColorMap::sequential(t);
-    // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Colormap
+//
+//  Two palettes:
+//    Sequential  – jet-like blue→cyan→green→yellow→red  (density, p, Mach…)
+//    Diverging   – blue→white→red  (signed fields: u, v)
+//
+//  Usage:
+//    double t = ColorMap::normalize(value, minVal, maxVal);
+//    QColor c = ColorMap::sequential(t);
+// ---------------------------------------------------------------------------
 
-    class ColorMap
+class ColorMap
 {
 public:
 

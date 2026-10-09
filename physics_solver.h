@@ -22,6 +22,8 @@
 //  * Time integration       : Forward Euler  or  SSP-RK2 (Heun)
 //  * Boundary conditions    : ghost-cell approach via BoundaryCondition hierarchy
 //  * Time step              : global CFL condition  dt = CFL * min_i(Ω_i / Σλ_f)
+//                             (sum over all faces, so this CFL is about twice
+//                             the classical Courant number)
 //
 //  Ownership
 //  ---------
@@ -45,8 +47,9 @@ public:
 
     enum class ReconstructionScheme
     {
-        PiecewiseConstant,   // current behaviour — zeroth order
-        MUSCL                // piecewise linear + MinMod limiter — first/second order
+        PiecewiseConstant,   // cell average up to the face — first order
+        MUSCL                // piecewise linear + MinMod limiter — second order
+                             // in smooth regions (with SSP-RK2)
     };
 
     enum class FluxScheme

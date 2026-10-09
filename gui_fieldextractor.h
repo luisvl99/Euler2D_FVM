@@ -6,17 +6,17 @@
 #include <limits>
 #include <vector>
 
-    // ---------------------------------------------------------------------------
-    // FieldExtractor
-    //
-    //  Given a FieldType, extracts a scalar value from a single cell and also
-    //  computes the global [min, max] range across the whole mesh in one pass.
-    //
-    //  FieldType::VelocityU / VelocityV use diverging colormap (signed);
-    //  all others use sequential.
-    // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// FieldExtractor
+//
+//  Given a FieldType, extracts a scalar value from a single cell and also
+//  computes the global [min, max] range across the whole mesh in one pass.
+//
+//  FieldType::VelocityU / VelocityV use diverging colormap (signed);
+//  all others use sequential.
+// ---------------------------------------------------------------------------
 
-    class FieldExtractor
+class FieldExtractor
 {
 public:
 

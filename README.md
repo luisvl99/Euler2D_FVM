@@ -31,24 +31,24 @@ I built it for my Master's thesis (TFM) in the *Master in Computational and Math
 
 ## Results (Sod shock tube, t = 0.2)
 
-N = 200 cells, CFL = 0.5, sorted from least to most accurate:
+Domain `Lx = 1` with N = 200 cells (`Ny = 1`), CFL = 0.5 (see the note on the CFL number below). L1 is the mean absolute error over the cell centres against the exact solution. Sorted from least to most accurate:
 
 | Flux    | Reconstruction | Time scheme   | L1(ρ)    | L1(p)    |
 |---------|----------------|---------------|----------|----------|
-| Rusanov | PC             | SSP-RK2       | 0.013374 | 0.012518 |
-| Rusanov | PC             | Forward Euler | 0.012795 | 0.011730 |
-| HLLC    | PC             | SSP-RK2       | 0.010435 | 0.009488 |
-| HLLC    | PC             | Forward Euler | 0.009632 | 0.008564 |
-| Rusanov | MUSCL          | SSP-RK2       | 0.005264 | 0.004154 |
-| Rusanov | MUSCL          | Forward Euler | 0.004591 | 0.003445 |
-| HLLC    | MUSCL          | SSP-RK2       | 0.004222 | 0.003408 |
-| HLLC    | MUSCL          | Forward Euler | 0.003343 | 0.002553 |
+| Rusanov | PC             | SSP-RK2       | 0.018254 | 0.015354 |
+| Rusanov | PC             | Forward Euler | 0.017447 | 0.014404 |
+| HLLC    | PC             | SSP-RK2       | 0.013307 | 0.011470 |
+| HLLC    | PC             | Forward Euler | 0.012256 | 0.010345 |
+| Rusanov | MUSCL          | SSP-RK2       | 0.005669 | 0.004165 |
+| Rusanov | MUSCL          | Forward Euler | 0.004807 | 0.003345 |
+| HLLC    | MUSCL          | SSP-RK2       | 0.004542 | 0.003450 |
+| HLLC    | MUSCL          | Forward Euler | 0.003406 | 0.002412 |
 
 Main findings:
-- **Reconstruction dominates.** Switching from piecewise constant to MUSCL cuts the density error by about 3×.
-- **Flux comes second.** HLLC improves on Rusanov by 20–35 %, mostly at the contact discontinuity.
-- **Forward Euler beats SSP-RK2** on this problem. Its truncation error is anti-diffusive and cancels part of the spatial diffusion, as the modified equation shows.
-- **Mesh refinement** gives first-order L1 convergence (observed rates 0.83–1.09), as expected with discontinuities present.
+- **Reconstruction dominates.** Switching from piecewise constant to MUSCL cuts the density error by 3–3.6×.
+- **Flux comes second.** HLLC improves on Rusanov by 20–30 %, mostly at the contact discontinuity.
+- **On Sod, Forward Euler beats SSP-RK2** at this CFL. Its truncation error is anti-diffusive and cancels part of the spatial diffusion, as the modified equation shows. This does not carry over to smooth flow: on a smooth density wave, MUSCL + Forward Euler is only first order, while MUSCL + SSP-RK2 converges at about second order (observed 1.9) and is about 13× more accurate at N = 800.
+- **With discontinuities, L1 converges more slowly than first order.** From N = 200 to 1600 the observed rate is about 0.65 for piecewise constant and 0.82–0.87 for MUSCL. The smeared contact discontinuity dominates the error.
 
 ## Building
 
@@ -129,4 +129,4 @@ The time step is `Δt = CFL · min_C( Ω_C / Σ_faces λ_f A_f )`, where the sum
 
 ## License
 
-Not chosen yet. Until a `LICENSE` file is added, all rights are reserved.
+MIT. See [LICENSE](LICENSE).

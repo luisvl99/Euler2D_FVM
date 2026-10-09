@@ -101,11 +101,13 @@ void StructuredMesh::generateFaces()
             f.nx = 1.0;
             f.ny = 0.0;
 
+            // Default tags (inlet left, outlet right, walls top/bottom);
+            // test cases retag them with setBoundaries()
             if(i == 0)
             {
                 // Left boundary: outward normal points LEFT
                 f.nx = -1.0;
-                f.boundaryType = BoundaryType::Inlet;//poner para que las elija el usuario
+                f.boundaryType = BoundaryType::Inlet;
             }
             else if(i == Nx)
             {
@@ -178,7 +180,7 @@ void StructuredMesh::generateFaces()
 void StructuredMesh::buildCellFaceConnectivity()
 {
 
-    for(size_t f=0; f<faces.size(); f++)
+    for(int f = 0; f < static_cast<int>(faces.size()); ++f)
     {
 
         int L = faces[f].leftCell;
