@@ -4,6 +4,8 @@ A finite-volume solver for the 2-D compressible Euler equations, written from sc
 
 I built it for my Master's thesis (TFM) in the *Master in Computational and Mathematical Engineering* (URV & UOC). The goal was educational and comparative: I derived, implemented and validated every numerical building block by hand, then measured how each numerical choice affects accuracy on the Sod shock tube.
 
+The numerical method is summarised in [docs/method.md](docs/method.md).
+
 ## Features
 
 **Numerics**
@@ -181,6 +183,10 @@ The time step is `Δt = CFL · min_C( Ω_C / Σ_faces λ_f A_f )`, where the sum
 - P. D. Lax, X.-D. Liu, "Solution of two-dimensional Riemann problems of gas dynamics by positive schemes", *SIAM J. Sci. Comput.* 19, 1998.
 - A. Kurganov, E. Tadmor, "Solution of two-dimensional Riemann problems for gas dynamics without Riemann problem solvers", *Numer. Methods Partial Differential Equations* 18, 2002.
 - F. Moukalled, L. Mangani, M. Darwish, *The Finite Volume Method in Computational Fluid Dynamics*, Springer, 2016.
+
+## Citation
+
+If you use this code in your work, please cite it. The citation data is in [CITATION.cff](CITATION.cff); GitHub shows it under "Cite this repository".
 
 ## License
 

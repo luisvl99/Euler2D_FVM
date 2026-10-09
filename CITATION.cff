@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Euler2D_FVM: a finite-volume solver for the 2-D compressible Euler equations"
+type: software
+authors:
+  - family-names: "Varela Laviana"
+    given-names: "Luis"
+license: MIT
+keywords:
+  - computational fluid dynamics
+  - finite volume method
+  - Euler equations
+  - Riemann solvers
+  - HLLC
+  - MUSCL
