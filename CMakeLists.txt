@@ -7,6 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(MSVC)
     add_compile_options(/W4)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)   # std::localtime is standard C++
 else()
     add_compile_options(-Wall -Wextra)
 endif()

@@ -9,6 +9,7 @@
 #include <cmath>
 #include <cstdio>
 #include <exception>
+#include <initializer_list>
 
 static int failures = 0;
 

@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  core:
+    name: Library, CLI and tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure (no GUI)
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DEULER_BUILD_GUI=OFF
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
+
+  gui:
+    name: Qt GUI build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OpenGL headers (needed by Qt Gui)
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libxkbcommon-dev
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.5.*'
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build
+
+  analysis:
+    name: Analysis scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build euler_cli
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DEULER_BUILD_GUI=OFF
+          cmake --build build --target euler_cli
+
+      - name: Install Python dependencies
+        run: pip install -r analysis/requirements.txt
+
+      - name: Exact solution self-check
+        working-directory: analysis
+        run: python -m euler_analysis.exact
+
+      - name: Sod study (regenerates the README table)
+        run: python analysis/sod_schemes.py
