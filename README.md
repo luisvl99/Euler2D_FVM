@@ -52,7 +52,7 @@ Main findings:
 
 ## Building
 
-Requirements: CMake ≥ 3.19, Qt ≥ 6.5 (Core and Widgets), and a C++17 compiler (developed with Qt 6.10 / MinGW 13).
+Requirements: CMake ≥ 3.19 and a C++17 compiler. The GUI also needs Qt ≥ 6.5 (Core and Widgets). The code was developed with Qt 6.10 and MinGW 13.
 
 ```bash
 cmake -S . -B build -DCMAKE_PREFIX_PATH=/path/to/Qt/6.x/<kit>
@@ -63,6 +63,12 @@ cmake --build build
 ```
 
 You can also open `CMakeLists.txt` directly in Qt Creator.
+
+Without Qt, turn the GUI off. The solver library and the tests still build:
+
+```bash
+cmake -S . -B build -DEULER_BUILD_GUI=OFF
+```
 
 ### Tests
 
@@ -103,18 +109,20 @@ The time step is `Δt = CFL · min_C( Ω_C / Σ_faces λ_f A_f )`, where the sum
 
 ## Code layout
 
+`src/core/` is the solver library (`euler_core`, no Qt). `src/gui/` is the Qt application, which links it.
+
 | Files | Purpose |
 |-------|---------|
-| `mesh_*.h/.cpp` | Nodes, faces (unit normals, left/right cells), cells, structured mesh generation |
-| `physics_eulerstate.h`, `physics_primitivestate.h` | Conserved/primitive state with arithmetic operators |
-| `physics_eulerphysics.*` | Thermodynamics, physical flux, Rusanov and HLLC fluxes (stateless) |
-| `physics_boundarycondition.h` | Ghost-state boundary conditions and their factory |
-| `physics_flowparameters.h` | Free-stream / inlet / back-pressure data |
-| `physics_solver.*` | Residual assembly, MUSCL reconstruction, time step, FE / SSP-RK2 |
-| `physics_testcases.*` | Test cases: boundary tags, initial conditions, end times |
-| `sod_exact.*` | Exact Riemann solver |
-| `gui_*`, `mainwindow.*`, `main.cpp` | Qt interface: mesh viewer, residual plot, 1-D profile viewer, CSV export |
-| `tests.cpp` | Headless regression checks |
+| `src/core/mesh_*` | Nodes, faces (unit normals, left/right cells), cells, structured mesh generation |
+| `src/core/physics_eulerstate.h`, `physics_primitivestate.h` | Conserved/primitive state with arithmetic operators |
+| `src/core/physics_eulerphysics.*` | Thermodynamics, physical flux, Rusanov and HLLC fluxes (stateless) |
+| `src/core/physics_boundarycondition.h` | Ghost-state boundary conditions and their factory |
+| `src/core/physics_flowparameters.h` | Free-stream / inlet / back-pressure data |
+| `src/core/physics_solver.*` | Residual assembly, MUSCL reconstruction, time step, FE / SSP-RK2, blow-up check |
+| `src/core/physics_testcases.*` | Test cases: boundary tags, initial conditions, end times |
+| `src/core/sod_exact.*` | Exact Riemann solver |
+| `src/gui/` | Qt interface: main window, mesh viewer, residual plot, 1-D profile viewer, CSV export |
+| `tests/tests.cpp` | Headless regression checks |
 
 ## References
 
